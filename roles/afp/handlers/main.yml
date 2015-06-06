@@ -1,0 +1,3 @@
+- name: restart afp
+  service: name=netatalk state=restarted
+  sudo: yes

@@ -1,0 +1,10 @@
+- hosts: homeserver
+  gather_facts: no
+  roles:
+    - common
+    - avahi # bonjour service
+    - samba # windows shares
+    - afp # apple share and tima machine
+    - docker # virtualization
+    - btsync # BitTorrent Sync
+    

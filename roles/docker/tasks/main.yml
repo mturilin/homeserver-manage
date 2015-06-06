@@ -1,0 +1,14 @@
+#- name: checking if docker installed
+#  command: which docker
+#  register: docker-installed
+#
+#- name: Installing Docker
+#  command: "wget -qO- https://get.docker.com/ | sh"
+#  sudo: yes
+
+
+- name: Install Docker
+  apt: pkg=docker.io
+  sudo: yes
+  tags:
+    - docker

@@ -1,0 +1,8 @@
+:DEFAULT: options:upriv,usedots
+
+{% for folder in sharing_folders %}
+{% if folder.afp | default(False) %}
+{{ folder.path }} "{{ folder.name }}" {% if folder.timemachine | default(False) %}options:tm {% endif %}{% if folder.sizelimit | default(False) %}volsizelimit:{{ folder.sizelimit }} {% endif %}{% if folder.allow | default(False) %}allow:{{ folder.allow }} {% endif %}
+{% endif %}
+
+{% endfor %}

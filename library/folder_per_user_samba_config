@@ -1,0 +1,49 @@
+#!/usr/bin/python
+# coding=utf-8
+
+from ansible.module_utils.basic import *
+import os
+
+DOCUMENTATION = ''
+
+EXAMPLES = ''
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            conf_root=dict(required=True),
+            folder_name=dict(required=True),
+            allow=dict(required=True),
+        ))
+
+    conf_root = module.params.get('conf_root')
+    folder_name = module.params.get('folder_name')
+    allow = module.params.get('allow')
+
+    changed = False
+
+    try:
+        for user in allow.split(','):
+            conf_folder_path = "%s/%s" % (conf_root, folder_name)
+            conf_file_path = "%s/%s.conf" % (conf_folder_path, user)
+
+            if not (os.path.exists(conf_file_path) and
+                            "browsable = yes" in open(conf_file_path).read()):
+
+                if not os.path.exists(conf_folder_path):
+                    os.makedirs(conf_folder_path)
+
+                with open(conf_file_path, "w") as file:
+                    file.write("browsable = yes\n")
+
+                changed = True
+
+    except Exception as exception:
+        module.fail_json(msg=unicode(exception))
+        return
+
+    module.exit_json(changed=changed)
+
+
+main()

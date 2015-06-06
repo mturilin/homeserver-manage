@@ -1,0 +1,17 @@
+- name: Change host name
+  hostname: name={{ inventory_hostname }}
+  sudo: yes
+
+
+- name: Update hosts file to include host name
+  lineinfile: dest=/etc/hosts regexp="^127.0.0.1\s+{{ inventory_hostname }}" line="127.0.0.1 {{ inventory_hostname }}"
+  sudo: yes
+
+
+- name: create users
+  user: name={{ item.name }} shell='/bin/bash' password='{{ item.password }}'
+  with_items: users
+  sudo: yes
+
+
+#https://download-cdn.getsyncapp.com/stable/linux-glibc-x64/BitTorrent-Sync_glibc23_x64.tar.gz

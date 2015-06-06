@@ -1,0 +1,34 @@
+- name: Install AFP system packages.
+  apt: pkg={{item}} state=installed #update-cache=yes
+  with_items:
+    - netatalk
+    - libc6-dev
+  sudo: yes
+
+- name: Creating AFP folders
+  file: state=directory path={{ item.path }} mode={{ item.mode }} owner={{ item.owner }}
+  sudo: yes
+  with_items: folders
+  when: item.afp | default(False)
+
+- name: AFP Config
+  template: src=afpd.conf.jinja2 dest=/etc/netatalk/afpd.conf
+  sudo: yes
+  notify:
+    - restart afp
+
+
+
+- name: Creating AFP folder config
+  template: src=AppleVolumes.default.jinja2 dest=/etc/netatalk/AppleVolumes.default
+  sudo: yes
+  notify:
+    - restart afp
+
+- name: Configuring Avahi to advertize AFP
+  template: src=afp.service.template dest=/etc/avahi/services/afp.service
+  sudo: yes
+  notify:
+    - restart avahi
+
+

@@ -1,0 +1,33 @@
+[global]
+workgroup = {{ samba.workgroup }}
+server string = {{ inventory_hostname }}
+netbios name = {{ inventory_hostname }}
+security = user
+map to guest = bad user
+dns proxy = no
+guest account = nobody
+access based share enum = yes
+{% if samba.wins_server %}wins server = {{ samba.wins_server }}{% endif %}
+
+[pub]
+path = /samba/pub
+browsable =yes
+writable = yes
+guest ok = yes
+read only = no
+
+{% for dir_rec in sharing_folders %}
+{% if dir_rec.samba | default(False) %}
+[{{ dir_rec.name }}]
+path={{ dir_rec.path  }}
+browsable = {{ dir_rec.browsable | default('yes')  }}
+writable = {{ dir_rec.writable | default('yes')  }}
+guest ok = {{ dir_rec.guest_ok | default('no')  }}
+guest only = {{ dir_rec.guest_only | default('no')  }}
+read only = {{ dir_rec.read_only | default('no')  }}
+{% if dir_rec.per_user_browsable | default(False) %}
+include = {{ samba.conf_root }}/{{ dir_rec.name }}/%U.conf
+{% endif %}
+{% endif %}
+
+{% endfor -%}
