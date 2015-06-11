@@ -1,0 +1,10 @@
+
+- name: Install Avahi Container
+  docker:
+    name: avahi
+    image: mturilin/avahi
+    state: started
+    pull: always
+    restart_policy: always
+    net: host
+  sudo: yes

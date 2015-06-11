@@ -30,3 +30,4 @@
   with_items: sharing_folders
   tags:
     - debug
+  sudo: yes

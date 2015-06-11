@@ -2,9 +2,10 @@
   gather_facts: no
   roles:
     - common
-    - avahi # bonjour service
-    - samba # windows shares
-    - afp # apple share and tima machine
     - docker # virtualization
+    - fileserver
+#    - avahi # bonjour service
+#    - samba # windows shares
+#    - afp # apple share and tima machine
     - btsync # BitTorrent Sync
-    
+

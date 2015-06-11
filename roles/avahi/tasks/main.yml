@@ -12,7 +12,7 @@
     - restart avahi
 
 - name: Configuring Avahi to advertize SMB
-  template: src=smb.service.template dest=/etc/avahi/services/smb.service
+  template: src=smb.service dest=/etc/avahi/services/smb.service
   sudo: yes
   when: samba is defined
   notify:

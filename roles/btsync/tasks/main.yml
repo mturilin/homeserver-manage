@@ -9,9 +9,11 @@
   docker:
     name: btsync-{{ item.user }}
     image: mturilin/btsync
-    state: reloaded
+    state: started
     pull: always
+    restart_policy: always
     ports:
     - "{{ item.web_ui }}:8888"
     - "{{ item.listen }}:55555"
   with_items: btsync
+  sudo: yes
