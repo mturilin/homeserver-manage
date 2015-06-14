@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: no
+
   tasks:
     - name: Creating BT-Sync folders
       file: state=directory path={{ item.path }} mode={{ item.mode | default('0770')}} owner={{ item.user }}

@@ -8,6 +8,7 @@ dns proxy = no
 guest account = nobody
 access based share enum = yes
 {% if samba_wins_server is defined %}wins server = {{ samba_wins_server }}{% endif %}
+{% if samba_wins_support is defined %}wins support = {{ samba_wins_server }}{% endif %}
 
 [pub]
 path = /samba/pub

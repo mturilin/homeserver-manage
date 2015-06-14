@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: no
+
   tasks:
     - name: Adding Docker repo key
       apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=36A1D7869245C8950F966E92D8576A8BA88D21E9

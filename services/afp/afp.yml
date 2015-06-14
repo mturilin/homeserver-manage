@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: no
+
   tasks:
     - name: Install AFP system packages.
       apt: pkg={{item}} state=installed #update-cache=yes

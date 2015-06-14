@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: no
+
   tasks:
     - name: Install Avahi system packages.
       apt: pkg={{item}} state=installed #update-cache=yes

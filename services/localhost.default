@@ -1,19 +1,20 @@
-host_name: home-server-test
+host_name: {{ ansible_hostname }}
 
 users: []
 
-samba_enabled: yes
+samba_enabled: no
 #samba_wins_server: "192.168.0.30"
+samba_wins_support: "yes"
 samba_workgroup: workgroup
-samba_conf_root: /samba/.config
-samba_hostname: myserver
+samba_conf_root: /etc/samba/user_config
+samba_hostname: {{ ansible_hostname }}
 
-avahi_enabled: yes
+avahi_enabled: no
 
-afp_enabled: yes
+afp_enabled: no
 afp_guest_access: yes
 
 sharing_folders: []
 
-btsync_enabled: yes
+btsync_enabled: no
 btsync: []
