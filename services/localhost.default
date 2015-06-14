@@ -1,0 +1,19 @@
+host_name: home-server-test
+
+users: []
+
+samba_enabled: yes
+#samba_wins_server: "192.168.0.30"
+samba_workgroup: workgroup
+samba_conf_root: /samba/.config
+samba_hostname: myserver
+
+avahi_enabled: yes
+
+afp_enabled: yes
+afp_guest_access: yes
+
+sharing_folders: []
+
+btsync_enabled: yes
+btsync: []

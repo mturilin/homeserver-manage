@@ -1,6 +1,0 @@
-
-
-- name: create users
-  user: name={{ item.name }} shell='/bin/bash' password='{{ item.password }}'
-  with_items: users
-  sudo: yes

@@ -1,0 +1,42 @@
+- hosts: localhost
+  tasks:
+    - name: Install Samba system packages.
+      apt: pkg={{item}} state=installed #update-cache=yes
+      with_items:
+        - samba
+        - samba-common
+        - python-glade2
+        - system-config-samba
+      sudo: yes
+
+    - name: Creating Samba folders
+      file: state=directory path={{ item.path }} mode={{ item.mode }} owner={{ item.owner }}
+      sudo: yes
+      with_items: sharing_folders
+      when: item.samba | default(False)
+      notify:
+        - restart samba
+
+    - name: Creating Samba config
+      template: src=smb.conf.jinja2 dest=/etc/samba/smb.conf
+      sudo: yes
+      notify:
+        - restart samba
+
+    - name: Create per user samba configs
+      folder_per_user_samba_config: conf_root={{ samba_conf_root }} folder_name={{ item.name }} allow={{ item.allow }}
+      when: >
+        item.allow is defined
+        and item.per_user_browsable is defined
+        and item.per_user_browsable
+        and item.samba is defined
+        and item.samba
+      with_items: sharing_folders
+      sudo: yes
+      notify:
+        - restart samba
+
+  handlers:
+    - name: restart samba
+      service: name=smbd state=restarted
+      sudo: yes

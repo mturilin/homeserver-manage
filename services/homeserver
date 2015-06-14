@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+import sys
+
+try:
+    import click
+except ImportError:
+    print >> sys.stderr, "Homeserver: Error, can't find command line libraries. Please activate virtualenv!"
+
+import os
+import shutil
+import yaml
+import click
+from ansible.playbook import PlayBook
+import subprocess
+from ansible import runner
+
+__author__ = 'michaelturilin'
+
+SERVICE_ORDER = [
+    "host",
+    "users",
+    "avahi",
+    "docker",
+    "samba",
+    "afp",
+    "btsync"
+]
+
+SERVICES_DIR = os.path.dirname(__file__)
+
+
+def load_config(configfile):
+    if not os.path.exists(configfile):
+        subprocess.call(["sudo", "cp", SERVICES_DIR + '/localhost.default', configfile])
+        # shutil.copyfile(SERVICES_DIR + '/localhost.default', configfile)
+
+    # read config
+    return yaml.load(open(configfile))
+
+
+@click.group()
+@click.option('--configfile', default='/etc/ansible/host_vars/localhost', help='path to the config file')
+@click.pass_context
+def cli(ctx, configfile):
+    click.echo('Reading configuration from %s' % configfile)
+    ctx.obj['configfile'] = configfile
+
+    config = load_config(configfile)
+    ctx.obj['config'] = config
+
+
+@click.command()
+@click.pass_context
+def list_services(ctx):
+    # for each service
+    for service in SERVICE_ORDER:
+        print "-", service
+
+
+@click.command()
+@click.argument('service_name')
+@click.pass_context
+def update_service(ctx, service_name):
+    if service_name in SERVICE_ORDER:
+        execute_service_playbook(service_name)
+    elif service_name == "ALL":
+        for sn in SERVICE_ORDER:
+            execute_service_playbook(sn)
+    else:
+        click.echo('Unknown service name "%s"' % service_name)
+        sys.exit(1)
+
+
+def execute_service_playbook(service_name):
+    click.echo('Updating service "%s"' % service_name)
+    playbook_path = '/'.join([SERVICES_DIR, service_name, service_name + ".yml"])
+    ansible_run_playbook(playbook_path)
+
+
+def ansible_run_playbook(playbook_path):
+    # pb = PlayBook(playbook=playbook_path, transport='local')
+    # pb.run()
+    subprocess.call(["ansible-playbook", playbook_path, "-c", "local"])
+
+
+cli.add_command(list_services)
+cli.add_command(update_service)
+
+if __name__ == "__main__":
+    cli(obj={})

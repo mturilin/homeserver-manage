@@ -1,0 +1,4 @@
+- hosts: homeserver
+  gather_facts: no
+  roles:
+    - homeserver

@@ -1,3 +1,0 @@
-- name: restart samba
-  service: name=smbd state=restarted
-  sudo: yes

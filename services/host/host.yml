@@ -1,0 +1,10 @@
+- hosts: localhost
+  tasks:
+    - name: Change host name
+      hostname: name={{ host_name }}
+      sudo: yes
+
+
+    - name: Update hosts file to include host name
+      lineinfile: dest=/etc/hosts regexp="^127.0.0.1\s+{{ host_name }}" line="127.0.0.1 {{ host_name }}"
+      sudo: yes

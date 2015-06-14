@@ -1,0 +1,30 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Adding Docker repo key
+      apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=36A1D7869245C8950F966E92D8576A8BA88D21E9
+      sudo: yes
+
+    - name: Add the Docker PPA
+      command: >
+        sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+        && apt-get update
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+      sudo: yes
+
+    - name: Install Docker
+      apt: pkg=lxc-docker
+      sudo: yes
+
+    - name: Install Python Setuptools
+      apt: pkg=python-setuptools
+      sudo: yes
+
+    - name: Installing pip
+      easy_install: name=pip
+      sudo: yes
+
+    - name: Install docker-py
+      pip: name=docker-py==1.1.0
+      sudo: yes

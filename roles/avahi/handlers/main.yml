@@ -1,3 +1,0 @@
-- name: restart avahi
-  service: name=avahi-daemon state=restarted
-  sudo: yes

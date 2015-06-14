@@ -7,7 +7,7 @@ map to guest = bad user
 dns proxy = no
 guest account = nobody
 access based share enum = yes
-{% if samba_wins_server %}wins server = {{ samba_wins_server }}{% endif %}
+{% if samba_wins_server is defined %}wins server = {{ samba_wins_server }}{% endif %}
 
 [pub]
 path = /samba/pub

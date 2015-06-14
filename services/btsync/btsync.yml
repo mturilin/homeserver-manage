@@ -1,0 +1,29 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Creating BT-Sync folders
+      file: state=directory path={{ item.path }} mode={{ item.mode | default('0770')}} owner={{ item.user }}
+      sudo: yes
+      with_items: btsync_instances
+
+
+    - name: Install BT-Sync Containers
+      docker:
+        name: btsync_{{ item.user }}
+        image: mturilin/btsync
+        state: started
+        pull: always
+        restart_policy: always
+        expose: # <----- SHAME TO ANSIBLE!!!!
+          - "{{ item.web_ui }}" # this is stupid error in ansible docker module
+          - "{{ item.listen }}" # normally this argument would be not necessary, but it is in ansible
+        ports:
+          - "{{ item.web_ui }}:{{ item.web_ui }}"
+          - "{{ item.listen }}:{{ item.listen }}"
+        env:
+          LISTENING_PORT: "{{ item.listen }}"
+          WEB_PORT: "{{ item.web_ui }}"
+        volumes:
+          - "{{ item.path }}/:/btsync/"
+      with_items: btsync_instances
+      sudo: yes

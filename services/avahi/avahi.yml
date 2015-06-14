@@ -1,0 +1,34 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Install Avahi system packages.
+      apt: pkg={{item}} state=installed #update-cache=yes
+      with_items:
+        - avahi-daemon
+        - libnss-mdns
+      sudo: yes
+
+    - name: Configuring Avahi to use mdns
+      lineinfile: 'dest=/etc/nsswitch.conf regexp="^hosts\:" line="hosts:      files mdns4_minimal [NOTFOUND=return] dns mdns4 mdns"'
+      sudo: yes
+      notify:
+        - restart avahi
+
+    - name: Configuring Avahi to advertize SMB
+      copy: src=smb.service dest=/etc/avahi/services/smb.service
+      sudo: yes
+      when: samba_enabled | default(False)
+      notify:
+        - restart avahi
+
+    - name: Configuring Avahi to advertize AFP
+      copy: src=afp.service dest=/etc/avahi/services/afp.service
+      sudo: yes
+      notify:
+        - restart avahi
+
+
+  handlers:
+    - name: restart avahi
+      service: name=avahi-daemon state=restarted
+      sudo: yes

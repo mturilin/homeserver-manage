@@ -1,0 +1,52 @@
+# install global dependecies
+- name: Install global system packages.
+  apt: pkg={{item}} state=installed #update-cache=yes
+  sudo: yes
+  with_items:
+    - build-essential
+    - htop
+    - python-dev
+    - libffi-dev # required for pyopenssl
+    - libssl-dev
+    - bash
+
+# install ansible
+- name: Install Python Setuptools
+  apt: pkg={{ item }}
+  sudo: yes
+  with_items:
+    - python-setuptools
+    - git
+
+- name: Installing pip
+  easy_install: name=pip
+  sudo: yes
+
+- name: Installing virtualenv
+  pip: name=virtualenv
+  sudo: yes
+
+# pulling manage repo
+- name: creating homeserver folder
+  file: path=/homeserver/ state=directory owner={{ ansible_ssh_user }}
+  sudo: yes
+
+- name: pulling manage repo
+  git: repo=https://github.com/mturilin/homeserver-manage dest=/homeserver/manage
+  when: not debug | default (False)
+
+# installing virtualenv
+- name: installing requirements into virtualenv
+  pip:  requirements=/homeserver/manage/requirements.txt virtualenv=/homeserver/env
+
+# creating local inventory
+- name: copying ansible inventory "hosts" file
+  copy: src=hosts dest=/etc/ansible/
+  sudo: yes
+
+
+# auto-activate virtualenv for the user
+- name: Setup virtualenv default for django user
+  lineinfile: dest=/home/{{ ansible_ssh_user }}/.bashrc line='source /homeserver/env/bin/activate'
+  sudo: yes
+
