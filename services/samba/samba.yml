@@ -10,7 +10,7 @@
       sudo: yes
 
     - name: Creating Samba folders
-      file: state=directory path={{ item.path }} mode={{ item.mode }} owner={{ item.owner }}
+      file: state=directory path={{ item.path }} mode={{ item.mode }} owner={{ item.owner }} group={{ item.owner }}
       sudo: yes
       with_items: sharing_folders
       when: item.samba | default(False)

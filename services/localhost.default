@@ -1,5 +1,7 @@
+host_enabled: no
 host_name: {{ ansible_hostname }}
 
+users_enabled: no
 users: []
 
 samba_enabled: no

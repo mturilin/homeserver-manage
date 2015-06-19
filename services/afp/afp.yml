@@ -11,7 +11,7 @@
     - name: Creating AFP folders
       file: state=directory path={{ item.path }} mode={{ item.mode }} owner={{ item.owner }}
       sudo: yes
-      with_items: folders
+      with_items: sharing_folders
       when: item.afp | default(False)
 
     - name: AFP Config

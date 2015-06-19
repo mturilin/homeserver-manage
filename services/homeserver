@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import types
 
 try:
     import click
@@ -7,12 +8,9 @@ except ImportError:
     print >> sys.stderr, "Homeserver: Error, can't find command line libraries. Please activate virtualenv!"
 
 import os
-import shutil
 import yaml
 import click
-from ansible.playbook import PlayBook
 import subprocess
-from ansible import runner
 
 __author__ = 'michaelturilin'
 
@@ -20,9 +18,9 @@ SERVICE_ORDER = [
     "host",
     "users",
     "avahi",
-    "docker",
     "samba",
     "afp",
+    "docker",
     "btsync"
 ]
 
@@ -40,9 +38,13 @@ def load_config(configfile):
 
 @click.group()
 @click.option('--configfile', default='/etc/ansible/host_vars/localhost', help='path to the config file')
+@click.option('--verbose', default=False, is_flag=True, help='print additional info')
 @click.pass_context
-def cli(ctx, configfile):
-    click.echo('Reading configuration from %s' % configfile)
+def cli(ctx, configfile, verbose):
+    if verbose:
+        click.echo('Reading configuration from %s' % configfile)
+
+    ctx.obj['verbose'] = verbose
     ctx.obj['configfile'] = configfile
 
     config = load_config(configfile)
@@ -57,22 +59,81 @@ def list_services(ctx):
         print "-", service
 
 
+def lookup(collection, comp):
+    try:
+        return collection[comp]
+    except (KeyError, TypeError):
+        pass
+
+    try:
+        return collection[int(comp)]
+    except (IndexError, TypeError, ValueError):
+        pass
+
+    try:
+        return getattr(collection, comp)
+    except AttributeError:
+        pass
+
+    raise LookupError("Name '%s' is not found" % comp)
+
+
+@click.command()
+@click.argument('var_name')
+@click.pass_context
+def get_var(ctx, var_name):
+    current_var = ctx.obj['config']
+    var_path = var_name.split(".")
+    for var_comp in var_path:
+        try:
+            current_var = lookup(current_var, var_comp)
+        except LookupError as err:
+            print >> sys.stderr, err
+            sys.exit(1)
+
+    print current_var
+
+
 @click.command()
 @click.argument('service_name')
 @click.pass_context
 def update_service(ctx, service_name):
     if service_name in SERVICE_ORDER:
-        execute_service_playbook(service_name)
+        _update_service(ctx, service_name)
     elif service_name == "ALL":
         for sn in SERVICE_ORDER:
-            execute_service_playbook(sn)
+            _update_service(ctx, sn)
     else:
         click.echo('Unknown service name "%s"' % service_name)
         sys.exit(1)
 
 
-def execute_service_playbook(service_name):
+BOOLEANS_TRUE = ['yes', 'on', '1', 'true', 1]
+BOOLEANS_FALSE = ['no', 'off', '0', 'false', 0]
+
+
+def ansible_boolean(arg):
+    """ return a bool for the arg """
+    if arg is None or type(arg) == bool:
+        return arg
+    if type(arg) in types.StringTypes:
+        arg = arg.lower()
+    if arg in BOOLEANS_TRUE:
+        return True
+    elif arg in BOOLEANS_FALSE:
+        return False
+    else:
+        raise ValueError("'%s' is not boolean" % arg)
+
+
+def _update_service(ctx, service_name):
     click.echo('Updating service "%s"' % service_name)
+    config = ctx.obj['config']
+
+    if not ansible_boolean(config.get(service_name + "_enabled", False)):
+        click.echo("Skipping. Service is not enabled in the config!")
+        return
+
     playbook_path = '/'.join([SERVICES_DIR, service_name, service_name + ".yml"])
     ansible_run_playbook(playbook_path)
 
@@ -85,6 +146,7 @@ def ansible_run_playbook(playbook_path):
 
 cli.add_command(list_services)
 cli.add_command(update_service)
+cli.add_command(get_var)
 
 if __name__ == "__main__":
     cli(obj={})
