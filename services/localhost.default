@@ -20,3 +20,7 @@ sharing_folders: []
 
 btsync_enabled: no
 btsync: []
+
+openvpn_enabled: no
+
+transmission_enabled: no

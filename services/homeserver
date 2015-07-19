@@ -21,7 +21,10 @@ SERVICE_ORDER = [
     "samba",
     "afp",
     "docker",
-    "btsync"
+    "btsync",
+    "openvpn",
+    "transmission",
+    "plex",
 ]
 
 SERVICES_DIR = os.path.dirname(__file__)
@@ -134,8 +137,17 @@ def _update_service(ctx, service_name):
         click.echo("Skipping. Service is not enabled in the config!")
         return
 
+    # trying to execute playbook
     playbook_path = '/'.join([SERVICES_DIR, service_name, service_name + ".yml"])
-    ansible_run_playbook(playbook_path)
+    if os.path.exists(playbook_path):
+        ansible_run_playbook(playbook_path)
+    else:
+        # trying to execute python script
+        script_path = '/'.join([SERVICES_DIR, service_name, service_name + ".py"])
+        if os.path.exists(script_path):
+            subprocess.call(["python", script_path])
+
+
 
 
 def ansible_run_playbook(playbook_path):

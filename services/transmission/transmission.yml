@@ -1,0 +1,32 @@
+- hosts: localhost
+
+  tasks:
+    - name: Creating Transmission folders
+      file: state=directory path={{ item }} mode=0777 owner={{ ansible_ssh_user }}
+      sudo: yes
+      with_items:
+        - "{{ transmission_downloads }}"
+        - "{{ transmission_incomplete }}"
+
+
+    - name: Install Transmission Containers
+      docker:
+        name: transmission
+        image: elventear/transmission
+        state: started
+        pull: always
+        restart_policy: always
+        expose: # <----- SHAME TO ANSIBLE!!!!
+          - 12345 # this is stupid error in ansible docker module
+          - 12345/upd # normally this argument would be not necessary, but it is in ansible
+          - 9091 # normally this argument would be not necessary, but it is in ansible
+        ports:
+          - "12345:12345"
+          - "12345:12345/udp"
+          - "9091:9091"
+        env:
+          ADMIN_PASS: "{{ transmission_password }}"
+        volumes:
+          - "{{ transmission_downloads }}:/var/lib/transmission-daemon/downloads"
+          - "{{ transmission_incomplete }}:/var/lib/transmission-daemon/incomplete"
+      sudo: yes

@@ -1,0 +1,23 @@
+- hosts: localhost
+
+  tasks:
+    - name: Creating Plex config folders
+      file: state=directory path={{ plex_config }} mode=0777 owner={{ ansible_ssh_user }}
+      sudo: yes
+
+    - name: Install Plex Containers
+      docker:
+        name: plex
+        image: timhaak/plex
+        state: started
+        pull: always
+        restart_policy: always
+        expose: # <----- SHAME TO ANSIBLE!!!!
+          - 32400 # this is stupid error in ansible docker module
+        ports:
+          - "32400:32400"
+        volumes:
+          - "{{ plex_config }}:/config"
+          - "{{ plex_data }}:/data"
+        hostname: "{{ host_name }}"
+      sudo: yes
